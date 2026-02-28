@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Birthday SlideShow</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&family=Dancing+Script:wght@700&family=Nunito:wght@300;400;700&family=Cinzel:wght@400;700&family=Josefin+Sans:wght@200;400;700&family=Pacifico&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --c1: #1a1a1a;
+    --c2: #d4a017;
+    --c3: #f5e6c3;
+    --c4: #2a2a2a;
+    --font-display: 'Playfair Display', serif;
+    --font-body: 'Cormorant Garamond', serif;
+    --font-accent: 'Dancing Script', cursive;
+    --transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  body {
+    background: var(--c1);
+    color: var(--c3);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background 0.6s, color 0.6s;
+  }
+
+  /* =========== SETUP SCREENS =========== */
+  #setup-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    position: relative;
+  }
+
+  .bg-particles {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    overflow: hidden;
+  }
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.15;
+    animation: float linear infinite;
+  }
+  @keyframes float {
+    0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.15; }
+    90% { opacity: 0.15; }
+    100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+  }
+
+  .step {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 900px;
+    position: relative;
+    z-index: 1;
+    animation: stepIn 0.5s ease;
+  }
+  .step.active { display: flex; }
+  @keyframes stepIn {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .step-title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    text-align: center;
+    margin-bottom: 0.4rem;
+    line-height: 1.1;
+    color: var(--c2);
+    text-shadow: 0 0 40px rgba(212,160,23,0.3);
+  }
+  .step-subtitle {
+    font-family: var(--font-body);
+    font-style: italic;
+    font-size: 1.1rem;
+    opacity: 0.7;
+    margin-bottom: 2.5rem;
+    text-align: center;
+  }
+
+  /* COLOR SCHEME CARDS */
+  .color-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    width: 100%;
+  }
+  .color-card {
+    cursor: pointer;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 2px solid transparent;
+    transition: var(--transition);
+    transform: scale(1);
+    position: relative;
+  }
+  .color-card:hover { transform: scale(1.04); }
+  .color-card.selected { border-color: white; transform: scale(1.04); box-shadow: 0 0 0 4px rgba(255,255,255,0.2); }
+  .color-swatch {
+    height: 80px;
+    display: flex;
+  }
+  .swatch-half { flex: 1; }
+  .color-card-label {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.85rem;
+    font-family: var(--font-body);
+    font-style: italic;
+    text-align: center;
+    background: rgba(255,255,255,0.05);
+  }
+
+  /* AGE WHEEL */
+  .age-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  .age-display {
+    font-family: var(--font-display);
+    font-size: 8rem;
+    line-height: 1;
+    color: var(--c2);
+    text-shadow: 0 0 60px rgba(212,160,23,0.4);
+    transition: var(--transition);
+    min-width: 3ch;
+    text-align: center;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+  }
+  .age-controls { display: flex; align-items: center; gap: 1.5rem; }
+  .age-btn {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    border: 2px solid var(--c2);
+    background: transparent;
+    color: var(--c2);
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .age-btn:hover { background: var(--c2); color: var(--c1); transform: scale(1.1); }
+  .age-input {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--c2);
+    color: var(--c3);
+    font-size: 1.2rem;
+    text-align: center;
+    width: 80px;
+    font-family: var(--font-body);
+    outline: none;
+    padding: 0.3rem;
+  }
+
+  /* AESTHETIC CARDS */
+  .aesthetic-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1.2rem;
+    width: 100%;
+  }
+  .aesthetic-card {
+    cursor: pointer;
+    border-radius: 20px;
+    padding: 1.8rem 1rem;
+    border: 2px solid rgba(255,255,255,0.1);
+    text-align: center;
+    transition: var(--transition);
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(8px);
+    position: relative;
+    overflow: hidden;
+  }
+  .aesthetic-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, var(--c2) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .aesthetic-card:hover::before, .aesthetic-card.selected::before { opacity: 0.12; }
+  .aesthetic-card:hover, .aesthetic-card.selected {
+    border-color: var(--c2);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  }
+  .aesthetic-icon { font-size: 2.5rem; margin-bottom: 0.8rem; display: block; position: relative; z-index: 1;}
+  .aesthetic-name {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: var(--c2);
+    position: relative; z-index: 1;
+  }
+  .aesthetic-desc {
+    font-size: 0.8rem;
+    opacity: 0.6;
+    margin-top: 0.3rem;
+    font-style: italic;
+    position: relative; z-index: 1;
+  }
+
+  /* UPLOAD */
+  .upload-zone {
+    width: 100%;
+    border: 2px dashed rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    background: rgba(255,255,255,0.03);
+    position: relative;
+  }
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: var(--c2);
+    background: rgba(255,255,255,0.07);
+  }
+  .upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .upload-icon { font-size: 2.2rem; margin-bottom: 0.6rem; }
+  .upload-text { font-size: 1.1rem; font-family: var(--font-body); font-style: italic; }
+  .upload-sub { font-size: 0.8rem; opacity: 0.5; margin-top: 0.3rem; }
+
+  /* Gallery strip — fixed height, horizontally scrollable */
+  .gallery-strip-wrap {
+    width: 100%;
+    margin-top: 1.2rem;
+    display: none;
+  }
+  .gallery-strip-wrap.has-images { display: block; }
+  .gallery-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.6rem;
+    padding: 0 0.2rem;
+  }
+  .gallery-count {
+    font-size: 0.85rem;
+    font-style: italic;
+    opacity: 0.6;
+  }
+  .gallery-clear {
+    font-size: 0.75rem;
+    opacity: 0.4;
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: inherit;
+    font-family: var(--font-body);
+    transition: opacity 0.2s;
+  }
+  .gallery-clear:hover { opacity: 0.8; }
+  .gallery-strip {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 0.5rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--c2) transparent;
+    scroll-behavior: smooth;
+  }
+  .gallery-strip::-webkit-scrollbar { height: 3px; }
+  .gallery-strip::-webkit-scrollbar-track { background: transparent; }
+  .gallery-strip::-webkit-scrollbar-thumb { background: var(--c2); border-radius: 2px; }
+  .preview-thumb {
+    flex-shrink: 0;
+    width: 72px;
+    height: 72px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 2px solid transparent;
+    transition: border-color 0.2s, transform 0.2s;
+    cursor: default;
+  }
+  .preview-thumb:hover { border-color: var(--c2); transform: scale(1.06); }
+
+  /* PROGRESS DOTS */
+  .progress-dots {
+    display: flex;
+    gap: 0.6rem;
+    margin-bottom: 2rem;
+    position: relative; z-index: 1;
+  }
+  .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    transition: var(--transition);
+  }
+  .dot.active { background: var(--c2); transform: scale(1.3); }
+  .dot.done { background: var(--c2); opacity: 0.5; }
+
+  /* BUTTONS */
+  .btn {
+    padding: 0.9rem 2.5rem;
+    border-radius: 50px;
+    border: 2px solid var(--c2);
+    background: transparent;
+    color: var(--c2);
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    font-style: italic;
+    cursor: pointer;
+    transition: var(--transition);
+    margin-top: 2rem;
+    letter-spacing: 0.05em;
+  }
+  .btn:hover { background: var(--c2); color: var(--c1); transform: scale(1.03); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+  .btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+  .btn-primary { background: var(--c2); color: var(--c1); }
+  .btn-primary:hover { filter: brightness(1.1); }
+
+  /* =========== SLIDESHOW =========== */
+  #slideshow-wrapper {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--c1);
+    z-index: 100;
+  }
+
+  .slide-bg {
+    position: absolute; inset: 0;
+    background-size: cover;
+    background-position: center;
+    transition: none;
+    filter: blur(30px) brightness(0.3) saturate(1.5);
+    transform: scale(1.1);
+  }
+
+  .slide-frame {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+  }
+
+  .slide-img-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .slide-img {
+    max-width: 96vw;
+    max-height: 96vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 4px;
+    display: block;
+    box-shadow: 0 20px 80px rgba(0,0,0,0.8);
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Aesthetic-specific frames */
+  .frame-luxurious .slide-img {
+    border: 4px solid;
+    border-image: linear-gradient(135deg, var(--c2), transparent, var(--c2)) 1;
+    box-shadow: 0 0 60px rgba(212,160,23,0.3), 0 30px 100px rgba(0,0,0,0.7);
+  }
+  .frame-glam .slide-img {
+    box-shadow: 0 0 0 2px var(--c2), 0 0 40px var(--c2), 0 30px 100px rgba(0,0,0,0.7);
+  }
+  .frame-cutesy .slide-img {
+    border-radius: 20px;
+    box-shadow: 0 0 0 6px white, 0 30px 100px rgba(0,0,0,0.5);
+  }
+  .frame-nature .slide-img {
+    border-radius: 40% 60% 60% 40% / 40% 40% 60% 60%;
+    box-shadow: 0 0 0 3px var(--c2), 0 30px 100px rgba(0,0,0,0.5);
+  }
+  .frame-serious .slide-img {
+    border-left: 4px solid var(--c2);
+    border-radius: 0;
+  }
+
+  /* Message overlay */
+  .slide-message {
+    position: absolute;
+    z-index: 10;
+    text-align: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.8s;
+  }
+  .slide-message.visible { opacity: 1; }
+  .slide-message.bottom { bottom: 8%; left: 50%; transform: translateX(-50%); width: 90%; }
+  .slide-message.top { top: 8%; left: 50%; transform: translateX(-50%); width: 90%; }
+  .slide-message.center { top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; }
+
+  .message-text {
+    font-family: var(--font-accent);
+    font-size: clamp(1.5rem, 4vw, 3rem);
+    color: var(--c2);
+    text-shadow: 0 2px 20px rgba(0,0,0,0.8), 0 0 40px rgba(0,0,0,0.5);
+    line-height: 1.3;
+  }
+  .message-text.serious {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1rem, 2.5vw, 1.8rem);
+    letter-spacing: 0.1em;
+  }
+  .message-text.nature {
+    font-family: 'Pacifico', cursive;
+  }
+  .message-text.cutesy {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+  }
+  .message-text.josefin {
+    font-family: 'Josefin Sans', sans-serif;
+    font-weight: 200;
+    letter-spacing: 0.2em;
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    text-transform: uppercase;
+  }
+
+  /* Age badge */
+  .age-badge {
+    position: absolute;
+    z-index: 10;
+    font-family: var(--font-display);
+    font-size: clamp(4rem, 12vw, 9rem);
+    font-weight: 700;
+    color: var(--c2);
+    opacity: 0;
+    transition: opacity 0.8s;
+    text-shadow: 0 0 80px rgba(0,0,0,0.8);
+    pointer-events: none;
+  }
+  .age-badge.visible { opacity: 0.12; }
+  .age-badge.center-big { top: 50%; left: 50%; transform: translate(-50%,-50%); }
+
+  /* Decorative elements */
+  .deco-layer {
+    position: absolute; inset: 0; z-index: 4; pointer-events: none; overflow: hidden;
+  }
+
+  /* Floating emojis */
+  .float-emoji {
+    position: absolute;
+    font-size: 2rem;
+    pointer-events: none;
+    opacity: 0;
+    animation: emojiFloat linear forwards;
+    z-index: 5;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
+    user-select: none;
+  }
+  @keyframes emojiFloat {
+    0%   { opacity: 0; transform: translateY(0) rotate(0deg) scale(0.5); }
+    10%  { opacity: 1; transform: translateY(-8vh) rotate(10deg) scale(1); }
+    85%  { opacity: 0.9; }
+    100% { opacity: 0; transform: translateY(-90vh) rotate(var(--er)) scale(0.8) translateX(var(--ex)); }
+  }
+
+  /* Confetti for glam/cutesy */
+  .confetti-piece {
+    position: absolute;
+    width: 8px; height: 8px;
+    opacity: 0;
+    animation: confettifall 3s linear forwards;
+    border-radius: 2px;
+  }
+  @keyframes confettifall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* Sparkles for luxurious */
+  .sparkle {
+    position: absolute;
+    width: 4px; height: 4px;
+    background: var(--c2);
+    border-radius: 50%;
+    opacity: 0;
+    animation: sparkle 1.5s ease-out forwards;
+  }
+  @keyframes sparkle {
+    0% { transform: scale(0); opacity: 0; }
+    30% { opacity: 1; transform: scale(1); }
+    100% { transform: scale(0) translate(var(--tx), var(--ty)); opacity: 0; }
+  }
+
+  /* Petals for nature */
+  .petal {
+    position: absolute;
+    width: 12px; height: 18px;
+    border-radius: 50% 0 50% 0;
+    opacity: 0;
+    animation: petalfall 4s ease-in forwards;
+  }
+  @keyframes petalfall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 0.8; }
+    100% { transform: translateY(110vh) rotate(360deg) translateX(40px); opacity: 0; }
+  }
+
+  /* Slide transitions */
+  .slide-img-container { transition: none; }
+  .anim-fade { animation: animFade 0.8s ease; }
+  .anim-slide-left { animation: animSlideLeft 0.6s ease; }
+  .anim-slide-right { animation: animSlideRight 0.6s ease; }
+  .anim-zoom { animation: animZoom 0.7s ease; }
+  .anim-flip { animation: animFlip 0.6s ease; }
+  .anim-swing { animation: animSwing 0.7s ease; }
+  .anim-float { animation: animFloat 0.8s ease; }
+  .anim-spin { animation: animSpin 0.5s ease; }
+  .anim-bounce { animation: animBounce 0.6s ease; }
+  .anim-blur { animation: animBlur 0.7s ease; }
+
+  @keyframes animFade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes animSlideLeft { from { opacity: 0; transform: translateX(-80px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes animSlideRight { from { opacity: 0; transform: translateX(80px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes animZoom { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: scale(1); } }
+  @keyframes animFlip { from { opacity: 0; transform: perspective(600px) rotateY(90deg); } to { opacity: 1; transform: perspective(600px) rotateY(0); } }
+  @keyframes animSwing { from { opacity: 0; transform: rotate(-10deg) scale(0.9); } to { opacity: 1; transform: rotate(0) scale(1); } }
+  @keyframes animFloat { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes animSpin { from { opacity: 0; transform: rotate(180deg) scale(0.5); } to { opacity: 1; transform: rotate(0) scale(1); } }
+  @keyframes animBounce { 0% { opacity: 0; transform: scale(0.3) translateY(-40px); } 60% { transform: scale(1.1); } 100% { opacity: 1; transform: scale(1); } }
+  @keyframes animBlur { from { opacity: 0; filter: blur(20px); } to { opacity: 1; filter: blur(0); } }
+
+  /* Controls */
+  .controls-hover-zone {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 18%;
+    z-index: 19;
+  }
+  .slide-controls {
+    position: absolute; bottom: 3%; left: 50%; transform: translateX(-50%);
+    z-index: 20;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+  }
+  .controls-hover-zone:hover .slide-controls {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .ctrl-btn {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.3);
+    background: rgba(0,0,0,0.5);
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(8px);
+  }
+  .ctrl-btn:hover { background: rgba(255,255,255,0.2); border-color: white; }
+  .slide-counter {
+    color: rgba(255,255,255,0.6);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    font-style: italic;
+    min-width: 60px;
+    text-align: center;
+  }
+
+  /* Progress bar */
+  .slide-progress {
+    position: absolute;
+    bottom: 0; left: 0;
+    height: 2px;
+    background: var(--c2);
+    z-index: 20;
+    transition: none;
+    transform-origin: left;
+  }
+
+  /* Back button hover zone */
+  .back-hover-zone {
+    position: absolute;
+    top: 0; left: 0;
+    width: 180px;
+    height: 100px;
+    z-index: 19;
+  }
+  .back-btn {
+    position: absolute;
+    top: 1.5rem; left: 1.5rem;
+    z-index: 20;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: opacity 0.5s ease;
+    opacity: 0;
+    backdrop-filter: blur(8px);
+    pointer-events: none;
+  }
+  .back-hover-zone:hover .back-btn {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .back-btn:hover { background: rgba(255,255,255,0.1); }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .color-grid { grid-template-columns: repeat(2, 1fr); }
+    .aesthetic-grid { grid-template-columns: repeat(2, 1fr); }
+    .step-title { font-size: 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-particles" id="particles"></div>
+
+<!-- SETUP -->
+<div id="setup-wrapper">
+
+  <!-- STEP 1: Color Scheme -->
+  <div class="step active" id="step-color">
+    <div class="progress-dots">
+      <div class="dot active" id="d1"></div>
+      <div class="dot" id="d2"></div>
+      <div class="dot" id="d3"></div>
+      <div class="dot" id="d4"></div>
+    </div>
+    <h1 class="step-title">Choose your palette</h1>
+    <p class="step-subtitle">Set the mood with color</p>
+    <div class="color-grid" id="color-grid"></div>
+    <button class="btn" id="btn-color" disabled onclick="goStep(2)">Continue →</button>
+  </div>
+
+  <!-- STEP 2: Age -->
+  <div class="step" id="step-age">
+    <div class="progress-dots">
+      <div class="dot done"></div>
+      <div class="dot active"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+    <h1 class="step-title">How many candles?</h1>
+    <p class="step-subtitle">Celebrating a milestone</p>
+    <div class="age-container">
+      <div class="age-display" id="age-display">21</div>
+      <div class="age-controls">
+        <button class="age-btn" onclick="changeAge(-1)">−</button>
+        <input class="age-input" type="number" id="age-input" value="21" min="1" max="120" oninput="syncAge(this.value)">
+        <button class="age-btn" onclick="changeAge(1)">+</button>
+      </div>
+    </div>
+    <button class="btn" onclick="goStep(3)">Continue →</button>
+  </div>
+
+  <!-- STEP 3: Aesthetic -->
+  <div class="step" id="step-aesthetic">
+    <div class="progress-dots">
+      <div class="dot done"></div>
+      <div class="dot done"></div>
+      <div class="dot active"></div>
+      <div class="dot"></div>
+    </div>
+    <h1 class="step-title">Pick your vibe</h1>
+    <p class="step-subtitle">This shapes every animation & effect</p>
+    <div class="aesthetic-grid" id="aesthetic-grid"></div>
+    <button class="btn" id="btn-aes" disabled onclick="goStep(4)">Continue →</button>
+  </div>
+
+  <!-- STEP 4: Upload -->
+  <div class="step" id="step-upload">
+    <div class="progress-dots">
+      <div class="dot done"></div>
+      <div class="dot done"></div>
+      <div class="dot done"></div>
+      <div class="dot active"></div>
+    </div>
+    <h1 class="step-title">Add your memories</h1>
+    <p class="step-subtitle">Upload as many photos as you like</p>
+    <div class="upload-zone" id="upload-zone"
+         ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropFiles(event)">
+      <input type="file" accept="image/*" multiple id="file-input" onchange="handleFiles(this.files)">
+      <div class="upload-icon">📸</div>
+      <div class="upload-text">Drop photos here or click to browse</div>
+      <div class="upload-sub">JPG, PNG, WEBP, GIF — any amount</div>
+    </div>
+    <div class="gallery-strip-wrap" id="gallery-strip-wrap">
+      <div class="gallery-meta">
+        <span class="gallery-count" id="upload-count"></span>
+        <button class="gallery-clear" onclick="clearImages()">✕ clear all</button>
+      </div>
+      <div class="gallery-strip" id="image-previews"></div>
+    </div>
+    <button class="btn btn-primary" id="btn-launch" disabled onclick="launchSlideshow()">✨ Create Slideshow</button>
+  </div>
+
+</div>
+
+<!-- SLIDESHOW -->
+<div id="slideshow-wrapper">
+  <div class="slide-bg" id="slide-bg"></div>
+  <div class="deco-layer" id="deco-layer"></div>
+
+  <div class="age-badge center-big" id="age-badge"></div>
+
+  <div class="slide-frame">
+    <div class="slide-img-container" id="img-container">
+      <img class="slide-img" id="slide-img" src="" alt="">
+    </div>
+  </div>
+
+  <div class="slide-message bottom" id="slide-message">
+    <div class="message-text" id="message-text"></div>
+  </div>
+
+  <div class="slide-progress" id="slide-progress"></div>
+
+  <div class="controls-hover-zone">
+    <div class="slide-controls">
+      <button class="ctrl-btn" onclick="slidePrev()">‹</button>
+      <button class="ctrl-btn" id="play-btn" onclick="togglePlay()">⏸</button>
+      <span class="slide-counter" id="slide-counter">1 / 1</span>
+      <button class="ctrl-btn" onclick="slideNext()">›</button>
+    </div>
+  </div>
+
+  <div class="back-hover-zone">
+    <button class="back-btn" onclick="backToSetup()">← Back</button>
+  </div>
+</div>
+
+<script>
+// ============ CONFIG ============
+const colorSchemes = [
+  { id:'black-gold', label:'Black & Gold', c1:'#0d0d0d', c2:'#c9a84c', c3:'#f5e6c3', c4:'#1a1a1a' },
+  { id:'pink-purple', label:'Pink & Purple', c1:'#1a0a2e', c2:'#f06292', c3:'#fce4ec', c4:'#2d1b4e' },
+  { id:'green-forest', label:'Sage & Forest', c1:'#0d1f0d', c2:'#7bc67e', c3:'#e8f5e9', c4:'#1b3a1b' },
+  { id:'navy-silver', label:'Navy & Silver', c1:'#0a0f1e', c2:'#b0c4de', c3:'#e8eef7', c4:'#111929' },
+  { id:'burgundy-gold', label:'Burgundy & Gold', c1:'#1a0508', c2:'#d4a017', c3:'#faebd7', c4:'#2d0d12' },
+  { id:'midnight-rose', label:'Midnight Rose', c1:'#0f0a14', c2:'#e8a0b4', c3:'#fce4ec', c4:'#1a1020' },
+  { id:'charcoal-coral', label:'Charcoal & Coral', c1:'#1c1c1c', c2:'#ff7e5f', c3:'#fff5f0', c4:'#2a2a2a' },
+  { id:'ivory-blush', label:'Ivory & Blush', c1:'#2d1b1b', c2:'#e8c4b0', c3:'#fff8f5', c4:'#3d2525' },
+  { id:'black-white', label:'Monochrome', c1:'#0a0a0a', c2:'#f0f0f0', c3:'#ffffff', c4:'#1a1a1a' },
+  { id:'teal-gold', label:'Teal & Gold', c1:'#051515', c2:'#e2c17c', c3:'#e0f7f7', c4:'#0a2525' },
+];
+
+const aesthetics = [
+  { id:'luxurious', icon:'💎', name:'Luxurious', desc:'Opulent, refined, timeless' },
+  { id:'glam', icon:'✨', name:'Glam', desc:'Shiny, bold, dazzling' },
+  { id:'cutesy', icon:'🎀', name:'Cutesy', desc:'Sweet, bubbly, adorable' },
+  { id:'serious', icon:'🖤', name:'Serious', desc:'Minimal, elegant, composed' },
+  { id:'nature', icon:'🌿', name:'Nature', desc:'Organic, earthy, flowing' },
+];
+
+const birthdayMessages = {
+  luxurious: [
+    "Another year of pure magnificence",
+    "Aging like the finest of wines",
+    "Elegance is your eternal gift",
+    "To a life beautifully lived",
+    "Rare. Precious. Irreplaceable.",
+    "May every year outshine the last",
+    "The world is richer for having you",
+  ],
+  glam: [
+    "Shine brighter than ever! ✨",
+    "You were BORN to sparkle 💫",
+    "All eyes on the birthday star 🌟",
+    "Dazzle them, darling!",
+    "Another lap around the sun — fabulous!",
+    "Party mode: ACTIVATED 🎉",
+    "The glam never stops! 💅",
+  ],
+  cutesy: [
+    "Happy happy happy birthday!! 🎂",
+    "You're SO loved!! 💕",
+    "Yay!! It's your special day!! 🎈",
+    "Sending you the biggest hugs!! 🤗",
+    "You deserve all the cake!! 🍰",
+    "Stay as sweet as you are!! 🍭",
+    "Birthday bestie!! 🎀",
+  ],
+  serious: [
+    "Year {age}. Well earned.",
+    "Presence over pageantry.",
+    "Time well spent.",
+    "A life of intention.",
+    "Depth over decoration.",
+    "Stillness. Strength. You.",
+    "Another year. Another layer.",
+  ],
+  nature: [
+    "Bloom in every season 🌸",
+    "Rooted in love, wild at heart 🌿",
+    "Like the river — always moving forward",
+    "May your garden keep growing 🌻",
+    "Season after season, beautifully you",
+    "Wild, wonderful, free 🍃",
+    "Every year, deeper roots",
+  ],
+};
+
+const aestheticEmojis = {
+  luxurious: ['💎','✨','👑','🥂','🌹','💫','🪙','🫧','🌟','💐'],
+  glam:      ['✨','💅','🌟','💃','🎉','🪩','💋','🔮','⭐','🎊'],
+  cutesy:    ['🎀','🌸','🍰','🧁','💕','🌈','🐣','🍭','🦋','💝','🎈','🌷'],
+  serious:   ['🖤','🕊️','🌑','◼️','🪨','🖤'],
+  nature:    ['🌿','🌸','🍃','🌻','🌊','🦋','🍀','🌾','🌺','🐦','🌙','🍂'],
+};
+
+
+const animsByAesthetic = {
+  luxurious: ['anim-fade', 'anim-zoom', 'anim-blur', 'anim-float', 'anim-slide-left', 'anim-slide-right'],
+  glam: ['anim-spin', 'anim-bounce', 'anim-flip', 'anim-zoom', 'anim-swing'],
+  cutesy: ['anim-bounce', 'anim-swing', 'anim-float', 'anim-zoom', 'anim-slide-right'],
+  serious: ['anim-fade', 'anim-slide-left', 'anim-blur', 'anim-slide-right'],
+  nature: ['anim-float', 'anim-fade', 'anim-blur', 'anim-swing', 'anim-slide-left'],
+};
+
+// ============ STATE ============
+const state = {
+  colorScheme: null,
+  age: 21,
+  aesthetic: null,
+  images: [],
+  currentSlide: 0,
+  playing: true,
+  slideTimer: null,
+  progressTimer: null,
+  slideDuration: 4000,
+};
+
+// ============ INIT ============
+function init() {
+  buildParticles();
+  buildColorGrid();
+  buildAestheticGrid();
+}
+
+function buildParticles() {
+  const c = document.getElementById('particles');
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = 6 + Math.random() * 20;
+    p.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${Math.random()*100}%;
+      background: var(--c2);
+      animation-duration: ${8+Math.random()*12}s;
+      animation-delay: ${-Math.random()*15}s;
+    `;
+    c.appendChild(p);
+  }
+}
+
+function buildColorGrid() {
+  const g = document.getElementById('color-grid');
+  colorSchemes.forEach(cs => {
+    const card = document.createElement('div');
+    card.className = 'color-card';
+    card.dataset.id = cs.id;
+    card.innerHTML = `
+      <div class="color-swatch">
+        <div class="swatch-half" style="background:${cs.c1}"></div>
+        <div class="swatch-half" style="background:${cs.c2}"></div>
+      </div>
+      <div class="color-card-label" style="background:${cs.c4};color:${cs.c3}">${cs.label}</div>
+    `;
+    card.onclick = () => selectColor(cs, card);
+    g.appendChild(card);
+  });
+}
+
+function buildAestheticGrid() {
+  const g = document.getElementById('aesthetic-grid');
+  aesthetics.forEach(a => {
+    const card = document.createElement('div');
+    card.className = 'aesthetic-card';
+    card.dataset.id = a.id;
+    card.innerHTML = `
+      <span class="aesthetic-icon">${a.icon}</span>
+      <div class="aesthetic-name">${a.name}</div>
+      <div class="aesthetic-desc">${a.desc}</div>
+    `;
+    card.onclick = () => selectAesthetic(a, card);
+    g.appendChild(card);
+  });
+}
+
+function selectColor(cs, card) {
+  document.querySelectorAll('.color-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  state.colorScheme = cs;
+  applyColors(cs);
+  document.getElementById('btn-color').disabled = false;
+}
+
+function applyColors(cs) {
+  document.documentElement.style.setProperty('--c1', cs.c1);
+  document.documentElement.style.setProperty('--c2', cs.c2);
+  document.documentElement.style.setProperty('--c3', cs.c3);
+  document.documentElement.style.setProperty('--c4', cs.c4);
+}
+
+function selectAesthetic(a, card) {
+  document.querySelectorAll('.aesthetic-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  state.aesthetic = a.id;
+  document.getElementById('btn-aes').disabled = false;
+  applyAestheticFonts(a.id);
+}
+
+function applyAestheticFonts(aes) {
+  const fontMap = {
+    luxurious: "'Playfair Display', serif",
+    glam: "'Cormorant Garamond', serif",
+    cutesy: "'Nunito', sans-serif",
+    serious: "'Cinzel', serif",
+    nature: "'Pacifico', cursive",
+  };
+  document.documentElement.style.setProperty('--font-display', fontMap[aes]);
+}
+
+function changeAge(delta) {
+  state.age = Math.max(1, Math.min(120, state.age + delta));
+  document.getElementById('age-display').textContent = state.age;
+  document.getElementById('age-input').value = state.age;
+}
+
+function syncAge(val) {
+  const v = parseInt(val);
+  if (!isNaN(v) && v >= 1 && v <= 120) {
+    state.age = v;
+    document.getElementById('age-display').textContent = v;
+  }
+}
+
+let currentStep = 1;
+function goStep(n) {
+  document.getElementById(`step-${['','color','age','aesthetic','upload'][currentStep]}`).classList.remove('active');
+  currentStep = n;
+  document.getElementById(`step-${['','color','age','aesthetic','upload'][n]}`).classList.add('active');
+}
+
+// ============ FILE UPLOAD ============
+function handleFiles(files) {
+  Array.from(files).forEach(file => {
+    if (!file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      state.images.push(e.target.result);
+      renderPreviews();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderPreviews() {
+  const strip = document.getElementById('image-previews');
+  const wrap = document.getElementById('gallery-strip-wrap');
+  const count = document.getElementById('upload-count');
+
+  strip.innerHTML = '';
+  state.images.forEach(src => {
+    const img = document.createElement('img');
+    img.className = 'preview-thumb';
+    img.src = src;
+    strip.appendChild(img);
+  });
+
+  const n = state.images.length;
+  count.textContent = n > 0 ? `${n} photo${n !== 1 ? 's' : ''} ready` : '';
+  wrap.classList.toggle('has-images', n > 0);
+  document.getElementById('btn-launch').disabled = n === 0;
+}
+
+function clearImages() {
+  state.images = [];
+  document.getElementById('file-input').value = '';
+  renderPreviews();
+}
+
+function dragOver(e) { e.preventDefault(); document.getElementById('upload-zone').classList.add('drag-over'); }
+function dragLeave(e) { document.getElementById('upload-zone').classList.remove('drag-over'); }
+function dropFiles(e) {
+  e.preventDefault();
+  dragLeave(e);
+  handleFiles(e.dataTransfer.files);
+}
+
+// ============ SLIDESHOW ============
+function launchSlideshow() {
+  document.getElementById('setup-wrapper').style.display = 'none';
+  document.getElementById('slideshow-wrapper').style.display = 'block';
+
+  // Shuffle images for variety
+  state.images = state.images.sort(() => Math.random() - 0.5);
+  state.currentSlide = 0;
+  state.playing = true;
+
+  // Apply aesthetic class
+  const sw = document.getElementById('slideshow-wrapper');
+  sw.className = `frame-${state.aesthetic}`;
+
+  // Age badge
+  document.getElementById('age-badge').textContent = state.age;
+
+  showSlide(0);
+  scheduleNext();
+}
+
+function showSlide(idx) {
+  const src = state.images[idx];
+  const bg = document.getElementById('slide-bg');
+  const img = document.getElementById('slide-img');
+  const counter = document.getElementById('slide-counter');
+
+  bg.style.backgroundImage = `url(${src})`;
+  img.src = src;
+
+  // Apply transition animation
+  const anims = animsByAesthetic[state.aesthetic] || ['anim-fade'];
+  const anim = anims[Math.floor(Math.random() * anims.length)];
+  const container = document.getElementById('img-container');
+  container.classList.remove(...Object.values(animsByAesthetic).flat());
+  void container.offsetWidth; // reflow
+  container.classList.add(anim);
+
+  counter.textContent = `${idx + 1} / ${state.images.length}`;
+
+  // Messages — show on every 3rd slide or randomly
+  const msgEl = document.getElementById('slide-message');
+  const msgText = document.getElementById('message-text');
+  const msgs = getMessages();
+
+  if (Math.random() > 0.4) {
+    const msg = msgs[idx % msgs.length];
+    msgText.textContent = msg;
+    msgText.className = 'message-text';
+    if (state.aesthetic === 'serious') msgText.classList.add('serious');
+    if (state.aesthetic === 'nature') msgText.classList.add('nature');
+    if (state.aesthetic === 'cutesy') msgText.classList.add('cutesy');
+    if (state.aesthetic === 'glam') msgText.classList.add('josefin');
+
+    msgEl.className = 'slide-message ' + ['bottom','top','bottom','bottom'][Math.floor(Math.random()*4)];
+    msgEl.classList.add('visible');
+
+    setTimeout(() => msgEl.classList.remove('visible'), state.slideDuration - 600);
+  } else {
+    msgEl.classList.remove('visible');
+  }
+
+  // Age badge — show occasionally
+  const badge = document.getElementById('age-badge');
+  if (Math.random() > 0.7) {
+    badge.classList.add('visible');
+    setTimeout(() => badge.classList.remove('visible'), state.slideDuration - 800);
+  } else {
+    badge.classList.remove('visible');
+  }
+
+  // Decorations
+  spawnDecorations();
+
+  // Progress bar
+  startProgress();
+}
+
+function getMessages() {
+  const template = birthdayMessages[state.aesthetic] || birthdayMessages.luxurious;
+  // Replace age placeholder in serious style
+  return template.map(m => m.replace('{age}', state.age));
+}
+
+function spawnDecorations() {
+  const layer = document.getElementById('deco-layer');
+  layer.innerHTML = '';
+
+  const aes = state.aesthetic;
+  if (aes === 'luxurious') spawnSparkles(layer);
+  else if (aes === 'glam') spawnConfetti(layer);
+  else if (aes === 'cutesy') spawnConfetti(layer, true);
+  else if (aes === 'nature') spawnPetals(layer);
+  // serious: minimal — just a rare emoji
+
+  spawnEmojis(layer);
+}
+
+function spawnEmojis(layer) {
+  const emojis = aestheticEmojis[state.aesthetic] || [];
+  if (!emojis.length) return;
+
+  // serious gets very few; others get a nice spread
+  const count = state.aesthetic === 'serious' ? 2 : (state.aesthetic === 'glam' ? 10 : 7);
+
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'float-emoji';
+      const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+      el.textContent = emoji;
+      const x = 5 + Math.random() * 90; // % from left
+      const duration = 3 + Math.random() * 4;
+      const rotate = (Math.random() - 0.5) * 360 + 'deg';
+      const drift = (Math.random() - 0.5) * 80 + 'px';
+      const size = 1.4 + Math.random() * 1.6;
+      el.style.cssText = `
+        left: ${x}%;
+        bottom: -5%;
+        font-size: ${size}rem;
+        --er: ${rotate};
+        --ex: ${drift};
+        animation-duration: ${duration}s;
+        animation-delay: ${Math.random() * 2}s;
+      `;
+      layer.appendChild(el);
+    }, i * 200);
+  }
+}
+
+function spawnSparkles(layer) {
+  for (let i = 0; i < 20; i++) {
+    setTimeout(() => {
+      const s = document.createElement('div');
+      s.className = 'sparkle';
+      const x = Math.random() * 100;
+      const y = Math.random() * 100;
+      const tx = (Math.random() - 0.5) * 80 + 'px';
+      const ty = (Math.random() - 0.5) * 80 + 'px';
+      s.style.cssText = `left:${x}%;top:${y}%;--tx:${tx};--ty:${ty};width:${3+Math.random()*5}px;height:${3+Math.random()*5}px;animation-delay:${Math.random()*0.5}s`;
+      layer.appendChild(s);
+    }, i * 100);
+  }
+}
+
+function spawnConfetti(layer, pastel = false) {
+  const colors = pastel
+    ? ['#ffb6c1','#ff69b4','#da70d6','#dda0dd','#fff0f5','#ffe4e1']
+    : [getComputedStyle(document.documentElement).getPropertyValue('--c2').trim(), 'white', '#fff5cc', '#ffe0f0'];
+
+  for (let i = 0; i < 40; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti-piece';
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    c.style.cssText = `
+      left:${Math.random()*100}%;
+      background:${color};
+      width:${5+Math.random()*8}px;
+      height:${5+Math.random()*8}px;
+      border-radius:${Math.random()>0.5?'50%':'2px'};
+      animation-delay:${Math.random()*2}s;
+      animation-duration:${2+Math.random()*2}s;
+    `;
+    layer.appendChild(c);
+  }
+}
+
+function spawnPetals(layer) {
+  const petalColors = ['#ffb7c5','#ffc0cb','#ff9eb5','#f08080','#dda0dd','#90ee90','#98fb98'];
+  for (let i = 0; i < 25; i++) {
+    const p = document.createElement('div');
+    p.className = 'petal';
+    const color = petalColors[Math.floor(Math.random() * petalColors.length)];
+    p.style.cssText = `
+      left:${Math.random()*100}%;
+      background:${color};
+      transform:rotate(${Math.random()*360}deg);
+      animation-delay:${Math.random()*3}s;
+      animation-duration:${3+Math.random()*2}s;
+    `;
+    layer.appendChild(p);
+  }
+}
+
+function startProgress() {
+  const bar = document.getElementById('slide-progress');
+  bar.style.transition = 'none';
+  bar.style.width = '0%';
+  void bar.offsetWidth;
+  bar.style.transition = `width ${state.slideDuration}ms linear`;
+  bar.style.width = '100%';
+}
+
+function scheduleNext() {
+  clearTimeout(state.slideTimer);
+  if (!state.playing) return;
+  state.slideTimer = setTimeout(() => {
+    state.currentSlide = (state.currentSlide + 1) % state.images.length;
+    showSlide(state.currentSlide);
+    scheduleNext();
+  }, state.slideDuration);
+}
+
+function slideNext() {
+  clearTimeout(state.slideTimer);
+  state.currentSlide = (state.currentSlide + 1) % state.images.length;
+  showSlide(state.currentSlide);
+  if (state.playing) scheduleNext();
+}
+
+function slidePrev() {
+  clearTimeout(state.slideTimer);
+  state.currentSlide = (state.currentSlide - 1 + state.images.length) % state.images.length;
+  showSlide(state.currentSlide);
+  if (state.playing) scheduleNext();
+}
+
+function togglePlay() {
+  state.playing = !state.playing;
+  document.getElementById('play-btn').textContent = state.playing ? '⏸' : '▶';
+  if (state.playing) {
+    scheduleNext();
+    startProgress();
+  } else {
+    clearTimeout(state.slideTimer);
+    document.getElementById('slide-progress').style.transition = 'none';
+  }
+}
+
+function backToSetup() {
+  clearTimeout(state.slideTimer);
+  document.getElementById('slideshow-wrapper').style.display = 'none';
+  document.getElementById('setup-wrapper').style.display = 'flex';
+}
+
+// Keyboard controls
+document.addEventListener('keydown', e => {
+  if (document.getElementById('slideshow-wrapper').style.display === 'block') {
+    if (e.key === 'ArrowRight') slideNext();
+    if (e.key === 'ArrowLeft') slidePrev();
+    if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+    if (e.key === 'Escape') backToSetup();
+  }
+});
+
+init();
+</script>
+</body>
+</html>
