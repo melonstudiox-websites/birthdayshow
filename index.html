@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Birthday SlideShow</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎂</text></svg>">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&family=Dancing+Script:wght@700&family=Nunito:wght@300;400;700&family=Cinzel:wght@400;700&family=Josefin+Sans:wght@200;400;700&family=Pacifico&display=swap" rel="stylesheet">
-  <style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Birthday Magic ✨</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎂</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&family=Dancing+Script:wght@700&family=Nunito:wght@300;400;700&family=Cinzel:wght@400;700&family=Josefin+Sans:wght@200;400;700&family=Pacifico&display=swap" rel="stylesheet">
+<style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
@@ -330,6 +330,86 @@
   .btn-primary { background: var(--c2); color: var(--c1); }
   .btn-primary:hover { filter: brightness(1.1); }
 
+  /* =========== BIRTHDAY SPLASH =========== */
+  #bday-splash {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--c1);
+    pointer-events: none;
+    transition: opacity 0.9s ease;
+  }
+  #bday-splash.hiding { opacity: 0; }
+  #bday-splash.gone { display: none; }
+
+  .splash-line1 {
+    font-family: var(--font-accent);
+    font-size: clamp(1.2rem, 4vw, 2.2rem);
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    opacity: 0;
+    animation: splashIn 0.7s 0.2s ease forwards;
+  }
+  .splash-age {
+    font-family: var(--font-display);
+    font-size: clamp(6rem, 22vw, 16rem);
+    font-weight: 700;
+    color: var(--c2);
+    line-height: 0.9;
+    opacity: 0;
+    filter: drop-shadow(0 0 60px var(--c2));
+    animation: splashAge 0.8s 0.6s cubic-bezier(0.2,0.8,0.3,1.2) forwards;
+  }
+  .splash-line2 {
+    font-family: var(--font-accent);
+    font-size: clamp(1.5rem, 5vw, 3rem);
+    color: white;
+    margin-top: 0.3em;
+    opacity: 0;
+    animation: splashIn 0.7s 1.1s ease forwards;
+  }
+  .splash-cannon-layer {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  @keyframes splashIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes splashAge {
+    from { opacity: 0; transform: scale(0.4) rotate(-8deg); }
+    to   { opacity: 1; transform: scale(1) rotate(0deg); }
+  }
+
+  /* Cannon burst particles */
+  .cannon-piece {
+    position: absolute;
+    border-radius: 3px;
+    opacity: 1;
+    animation: cannonBurst var(--cd) var(--delay) cubic-bezier(0.2,0.8,0.4,1) forwards;
+  }
+  @keyframes cannonBurst {
+    0%   { transform: translate(0,0) rotate(0deg) scale(1); opacity: 1; }
+    100% { transform: translate(var(--cx), var(--cy)) rotate(var(--cr)) scale(0.3); opacity: 0; }
+  }
+  .cannon-emoji {
+    position: absolute;
+    font-size: 2.2rem;
+    opacity: 0;
+    animation: cannonEmoji var(--cd) var(--delay) ease-out forwards;
+  }
+  @keyframes cannonEmoji {
+    0%   { transform: translate(0,0) scale(0.2); opacity: 0; }
+    15%  { opacity: 1; transform: translate(calc(var(--cx)*0.1), calc(var(--cy)*0.1)) scale(1.2); }
+    100% { transform: translate(var(--cx), var(--cy)) scale(0.6) rotate(var(--cr)); opacity: 0; }
+  }
+
   /* =========== SLIDESHOW =========== */
   #slideshow-wrapper {
     display: none;
@@ -418,29 +498,42 @@
 
   .message-text {
     font-family: var(--font-accent);
-    font-size: clamp(1.5rem, 4vw, 3rem);
-    color: var(--c2);
-    text-shadow: 0 2px 20px rgba(0,0,0,0.8), 0 0 40px rgba(0,0,0,0.5);
-    line-height: 1.3;
+    font-size: clamp(1.3rem, 3.5vw, 2.4rem);
+    color: #fff;
+    line-height: 1.4;
+    display: inline-block;
+    padding: 0.55em 1.3em;
+    border-radius: 60px;
+    background: rgba(0,0,0,0.52);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 4px 30px rgba(0,0,0,0.4);
+    text-shadow: none;
   }
   .message-text.serious {
     font-family: 'Cinzel', serif;
-    font-size: clamp(1rem, 2.5vw, 1.8rem);
-    letter-spacing: 0.1em;
+    font-size: clamp(0.95rem, 2vw, 1.5rem);
+    letter-spacing: 0.12em;
+    border-radius: 6px;
+    background: rgba(0,0,0,0.65);
   }
   .message-text.nature {
     font-family: 'Pacifico', cursive;
+    border-radius: 40px;
   }
   .message-text.cutesy {
     font-family: 'Nunito', sans-serif;
     font-weight: 700;
+    border-radius: 999px;
   }
   .message-text.josefin {
     font-family: 'Josefin Sans', sans-serif;
     font-weight: 200;
-    letter-spacing: 0.2em;
-    font-size: clamp(1rem, 2vw, 1.5rem);
+    letter-spacing: 0.18em;
+    font-size: clamp(0.9rem, 1.8vw, 1.4rem);
     text-transform: uppercase;
+    border-radius: 4px;
   }
 
   /* Age badge */
@@ -728,6 +821,14 @@
 <div id="slideshow-wrapper">
   <div class="slide-bg" id="slide-bg"></div>
   <div class="deco-layer" id="deco-layer"></div>
+
+  <!-- Birthday splash intro -->
+  <div id="bday-splash">
+    <div class="splash-cannon-layer" id="splash-cannon"></div>
+    <div class="splash-line1" id="splash-line1">Happy Birthday</div>
+    <div class="splash-age" id="splash-age"></div>
+    <div class="splash-line2" id="splash-line2"></div>
+  </div>
 
   <div class="age-badge center-big" id="age-badge"></div>
 
@@ -1022,21 +1123,116 @@ function launchSlideshow() {
   document.getElementById('setup-wrapper').style.display = 'none';
   document.getElementById('slideshow-wrapper').style.display = 'block';
 
-  // Shuffle images for variety
   state.images = state.images.sort(() => Math.random() - 0.5);
   state.currentSlide = 0;
   state.playing = true;
 
-  // Apply aesthetic class
   const sw = document.getElementById('slideshow-wrapper');
   sw.className = `frame-${state.aesthetic}`;
 
-  // Age badge
   document.getElementById('age-badge').textContent = state.age;
 
-  showSlide(0);
-  scheduleNext();
+  // Setup splash content
+  document.getElementById('splash-age').textContent = state.age;
+  const splashLine2Map = {
+    luxurious: 'A year of magnificence awaits',
+    glam:      'Time to SHINE ✨',
+    cutesy:    'Yay!! Your day is here!! 🎀',
+    serious:   'Well earned.',
+    nature:    'Another beautiful season 🌿',
+  };
+  document.getElementById('splash-line2').textContent = splashLine2Map[state.aesthetic] || 'Happy Birthday!';
+
+  // Apply aesthetic font to splash
+  applyAestheticFonts(state.aesthetic);
+
+  // Fire cannons on the splash
+  setTimeout(() => fireCannons(), 400);
+
+  // After splash, fade it out and start slideshow
+  const splashEl = document.getElementById('bday-splash');
+  splashEl.classList.remove('hiding', 'gone');
+
+  setTimeout(() => {
+    splashEl.classList.add('hiding');
+    setTimeout(() => {
+      splashEl.classList.add('gone');
+      showSlide(0);
+      scheduleNext();
+    }, 900);
+  }, 3200);
 }
+
+function fireCannons() {
+  const layer = document.getElementById('splash-cannon');
+  layer.innerHTML = '';
+  const aes = state.aesthetic;
+
+  const cannonConfigs = {
+    luxurious: { colors: ['#c9a84c','#fff8e7','#f5e6c3','#e0c97a'], shapes: ['💎','✨','👑','🥂'], count: 60 },
+    glam:      { colors: ['#ff69b4','#fff','#ffd700','#da70d6'], shapes: ['✨','💅','🎊','⭐','💃'], count: 80 },
+    cutesy:    { colors: ['#ffb6c1','#ff69b4','#dda0dd','#fff','#ffd700'], shapes: ['🎀','🌸','💕','🎈','🧁'], count: 80 },
+    serious:   { colors: ['#fff','#aaa','#666','#333'], shapes: ['🖤','🕊️'], count: 30 },
+    nature:    { colors: ['#7bc67e','#90ee90','#ffd700','#ffb7c5','#98fb98'], shapes: ['🌸','🌿','🍃','🌻','🦋'], count: 60 },
+  };
+
+  const cfg = cannonConfigs[aes] || cannonConfigs.luxurious;
+
+  // Fire from bottom-left and bottom-right corners (cannons!)
+  const origins = [
+    { x: '10%', y: '90%' },
+    { x: '90%', y: '90%' },
+    { x: '50%', y: '95%' },
+  ];
+
+  origins.forEach((origin, oi) => {
+    // Confetti pieces
+    for (let i = 0; i < cfg.count / origins.length; i++) {
+      setTimeout(() => {
+        const el = document.createElement('div');
+        el.className = 'cannon-piece';
+        const color = cfg.colors[Math.floor(Math.random() * cfg.colors.length)];
+        const angle = -180 + (oi === 0 ? Math.random() * 90 : oi === 1 ? -Math.random() * 90 : (Math.random() - 0.5) * 180);
+        const dist = 200 + Math.random() * 400;
+        const rad = angle * Math.PI / 180;
+        const cx = Math.cos(rad) * dist + 'px';
+        const cy = Math.sin(rad) * dist + 'px';
+        const dur = (0.8 + Math.random() * 0.8) + 's';
+        const delay = (oi * 0.1 + Math.random() * 0.3) + 's';
+        const size = 6 + Math.random() * 10;
+        el.style.cssText = `
+          left:${origin.x}; top:${origin.y};
+          width:${size}px; height:${size * (Math.random() > 0.5 ? 1 : 2.5)}px;
+          background:${color};
+          border-radius:${Math.random() > 0.5 ? '50%' : '2px'};
+          --cx:${cx}; --cy:${cy}; --cr:${Math.random()*720}deg;
+          --cd:${dur}; --delay:${delay};
+        `;
+        layer.appendChild(el);
+      }, i * 8);
+    }
+
+    // Emoji bursts
+    cfg.shapes.forEach((emoji, ei) => {
+      setTimeout(() => {
+        const el = document.createElement('div');
+        el.className = 'cannon-emoji';
+        el.textContent = emoji;
+        const angle = -160 + (oi === 0 ? Math.random() * 80 : oi === 1 ? -Math.random() * 80 : (Math.random() - 0.5) * 140);
+        const dist = 150 + Math.random() * 300;
+        const rad = angle * Math.PI / 180;
+        el.style.cssText = `
+          left:${origin.x}; top:${origin.y};
+          --cx:${Math.cos(rad)*dist}px; --cy:${Math.sin(rad)*dist}px;
+          --cr:${(Math.random()-0.5)*360}deg;
+          --cd:${0.9 + Math.random()*0.7}s; --delay:${oi*0.12 + ei*0.06}s;
+        `;
+        layer.appendChild(el);
+      }, ei * 40 + oi * 80);
+    });
+  });
+}
+
 
 function showSlide(idx) {
   const src = state.images[idx];
