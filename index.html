@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Birthday Show</title>
+<title>Birthday Magic ✨</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎂</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&family=Dancing+Script:wght@700&family=Nunito:wght@300;400;700&family=Cinzel:wght@400;700&family=Josefin+Sans:wght@200;400;700&family=Pacifico&display=swap" rel="stylesheet">
 <style>
@@ -1214,7 +1214,7 @@ function launchSlideshow() {
   document.getElementById('setup-wrapper').style.display = 'none';
   document.getElementById('slideshow-wrapper').style.display = 'block';
 
-  state.images = state.images.sort(() => Math.random() - 0.5);
+  // preserve upload order
   state.currentSlide = 0;
   state.playing = true;
 
